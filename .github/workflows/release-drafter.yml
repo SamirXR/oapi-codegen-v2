@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   update_release_draft:
+    if: github.repository == 'oapi-codegen/oapi-codegen'
     permissions:
       contents: write
       pull-requests: write
