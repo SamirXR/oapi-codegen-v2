@@ -77,3 +77,30 @@ cd examples && go run ./petstore-expanded/common/client/ --port 8080
 ```
 
 The client verifies: add pets, find by ID, 404 on missing pet, list/filter by tag, delete, and empty list after deletion.
+
+## Contract Testing with Specmatic
+
+The `stdhttp` variant has an opt-in [Specmatic](https://specmatic.io/) contract test for `petstore-expanded.yaml`. The normal test suite does not invoke Specmatic.
+
+### Prerequisites
+
+- Docker
+- Go and GNU Make
+
+The test runs the pinned `specmatic/specmatic:2.50.1` image, following Specmatic's current [Docker installation](https://docs.specmatic.io/download) and [CLI quick-start](https://docs.specmatic.io/getting_started/cli_quick_start) guidance. It does not use a host-installed CLI, alias, JDK, Homebrew, or npm package.
+
+### Running Locally
+
+```sh
+make specmatic-test
+```
+
+The Go test starts `server.NewServer()`, seeds pets through its public `POST /pets` API, and makes the host service reachable from the container. `schemaResiliencyTests: all` enables generative negative scenarios that mutate required fields, types, and parameters. Specmatic also runs positive, 400, and 404 scenarios for all four OpenAPI operations. The checked-in overlay makes the broad `default` responses explicit for testing, so the report contains real HTTP statuses rather than Specmatic's internal `1000` marker. The configured gate requires 100% API coverage and zero missed operations.
+
+The HTML report is written to `examples/petstore-expanded/stdhttp/build/reports/specmatic/test/html/index.html`. The generated report directory is ignored by Git, and the dedicated GitHub Actions workflow uploads it as the `specmatic-report` artifact for seven days.
+
+This test verifies externally observable HTTP behavior against the OpenAPI contract; it does not replace Go tests for internal business rules. The same pattern works for another service by pointing the Config V3 source at its OpenAPI document, starting that service in the harness, and providing deterministic state through examples or a dictionary.
+
+Spring Actuator does not apply to this Go `net/http` server. For actual implementation coverage, the harness instead exposes the generated server's embedded OpenAPI document at a test-only URL and configures Specmatic's supported `swaggerUrl`. No actuator or documentation route is added to the example server itself.
+
+The dedicated GitHub Actions workflow runs the same Make target. It is path-filtered to the target, workflow, examples module metadata, and Petstore stdhttp contract-test files.

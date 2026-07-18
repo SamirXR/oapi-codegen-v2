@@ -1,0 +1,6 @@
+NewPet:
+  name: ["Spot", "Fido", "Buddy"]
+  tag: ["dog", "cat", "bird"]
+PARAMETERS:
+  PATH:
+    id: 1000

@@ -1,0 +1,58 @@
+name: Specmatic Contract Tests
+on:
+  push:
+    paths:
+      - '.github/workflows/specmatic-contract-tests.yml'
+      - 'Makefile'
+      - 'examples/go.mod'
+      - 'examples/go.sum'
+      - 'examples/petstore-expanded/README.md'
+      - 'examples/petstore-expanded/petstore-expanded.yaml'
+      - 'examples/petstore-expanded/petstore-expanded_dictionary.yaml'
+      - 'examples/petstore-expanded/petstore-expanded_examples/**'
+      - 'examples/petstore-expanded/petstore-expanded_overlay.yaml'
+      - 'examples/petstore-expanded/stdhttp/**'
+  pull_request:
+    paths:
+      - '.github/workflows/specmatic-contract-tests.yml'
+      - 'Makefile'
+      - 'examples/go.mod'
+      - 'examples/go.sum'
+      - 'examples/petstore-expanded/README.md'
+      - 'examples/petstore-expanded/petstore-expanded.yaml'
+      - 'examples/petstore-expanded/petstore-expanded_dictionary.yaml'
+      - 'examples/petstore-expanded/petstore-expanded_examples/**'
+      - 'examples/petstore-expanded/petstore-expanded_overlay.yaml'
+      - 'examples/petstore-expanded/stdhttp/**'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Run Specmatic contract tests
+        run: make specmatic-test
+
+      - name: Upload Specmatic HTML report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: specmatic-report
+          path: examples/petstore-expanded/stdhttp/build/reports/specmatic
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Check for generated artifacts
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain)"

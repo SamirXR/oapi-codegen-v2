@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -22,9 +23,22 @@ func NewServer() (*http.Server, error) {
 	petStore := NewPetStore()
 
 	r := http.NewServeMux()
-	api.HandlerFromMux(petStore, r)
+	errorHandler := func(w http.ResponseWriter, message string, statusCode int) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(statusCode)
+		_ = json.NewEncoder(w).Encode(api.Error{Code: int32(statusCode), Message: message})
+	}
 
-	h := middleware.OapiRequestValidator(swagger)(r)
+	api.HandlerWithOptions(petStore, api.StdHTTPServerOptions{
+		BaseRouter: r,
+		ErrorHandlerFunc: func(w http.ResponseWriter, _ *http.Request, err error) {
+			errorHandler(w, err.Error(), http.StatusBadRequest)
+		},
+	})
+
+	h := middleware.OapiRequestValidatorWithOptions(swagger, &middleware.Options{
+		ErrorHandler: errorHandler,
+	})(r)
 
 	return &http.Server{Handler: h}, nil
 }

@@ -1,0 +1,57 @@
+overlay: 1.0.0
+info:
+  title: Explicit Petstore error responses for contract tests
+  version: 1.0.0
+actions:
+  - target: $.paths['/pets'].get.responses
+    update:
+      '400':
+        description: invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+  - target: $.paths['/pets'].get.responses.default
+    remove: true
+  - target: $.paths['/pets'].post.responses
+    update:
+      '400':
+        description: invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+  - target: $.paths['/pets'].post.responses.default
+    remove: true
+  - target: $.paths['/pets/{id}'].get.responses
+    update:
+      '400':
+        description: invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '404':
+        description: pet not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+  - target: $.paths['/pets/{id}'].get.responses.default
+    remove: true
+  - target: $.paths['/pets/{id}'].delete.responses
+    update:
+      '400':
+        description: invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '404':
+        description: pet not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+  - target: $.paths['/pets/{id}'].delete.responses.default
+    remove: true

@@ -2,3 +2,4 @@
 .DS_Store
 .vscode/
 bin/
+examples/petstore-expanded/stdhttp/build/reports/specmatic/

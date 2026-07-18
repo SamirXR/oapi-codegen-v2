@@ -30,7 +30,7 @@ func (p *Store) FindPets(tags *[]string, limit *int32) []api.Pet {
 	p.Lock.Lock()
 	defer p.Lock.Unlock()
 
-	var result []api.Pet
+	result := make([]api.Pet, 0)
 
 	for _, pet := range p.Pets {
 		if tags != nil {

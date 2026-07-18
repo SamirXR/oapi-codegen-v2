@@ -1,0 +1,39 @@
+version: 3
+
+systemUnderTest:
+  service:
+    $ref: "#/components/services/petstore"
+    runOptions:
+      $ref: "#/components/runOptions/petstore"
+
+specmatic:
+  governance:
+    report:
+      outputDirectory: "${SPECMATIC_REPORT_DIR:./build/reports/specmatic}"
+    successCriteria:
+      minCoveragePercentage: 100
+      maxMissedOperationsInSpec: 0
+      enforce: true
+  settings:
+    test:
+      schemaResiliencyTests: all
+
+components:
+  sources:
+    localContracts:
+      filesystem:
+        directory: ..
+  services:
+    petstore:
+      definitions:
+        - definition:
+            source:
+              $ref: "#/components/sources/localContracts"
+            specs:
+              - petstore-expanded.yaml
+  runOptions:
+    petstore:
+      openapi:
+        type: test
+        baseUrl: "${PETSTORE_BASE_URL:http://127.0.0.1:8080}"
+        swaggerUrl: "${PETSTORE_SWAGGER_URL:http://127.0.0.1:8080/openapi.json}"

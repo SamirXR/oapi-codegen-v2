@@ -8,12 +8,17 @@ help:
 	@echo "    test:        run all tests"
 	@echo "    tidy         tidy go mod"
 	@echo "    lint         lint the project"
+	@echo "    specmatic-test: run Petstore stdhttp contract tests"
 
 $(GOBIN)/golangci-lint:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/main/install.sh | sh -s -- -b $(GOBIN) v2.12.2
 
 .PHONY: tools
 tools: $(GOBIN)/golangci-lint
+
+.PHONY: specmatic-test
+specmatic-test:
+	cd examples/petstore-expanded/stdhttp && go test -tags=specmatic -count=1 -v ./...
 
 lint: tools
 	# run the root module explicitly, to prevent recursive calls by re-invoking `make ...` top-level
